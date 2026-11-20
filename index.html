@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir UAT - SIFIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <div class="logo">SIFIN</div>
+        <div>
+            <h1>Formulir Wawancara UAT</h1>
+            <p>Sistem Informasi Inventory (SIFIN)</p>
+        </div>
+        <span class="header-label">USER ACCEPTANCE TESTING</span>
+    </header>
+
+    <form id="formUAT">
+
+        <section class="form-section">
+            <h2>Identitas Penguji & Responden</h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nama Penguji</label>
+                    <input type="text" name="namaPenguji"
+                        placeholder="Nama lengkap penguji (QA)">
+                </div>
+
+                <div class="form-group">
+                    <label>Tanggal Wawancara</label>
+                    <input type="date" name="tanggal">
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Responden</label>
+                    <input type="text" name="namaResponden"
+                        placeholder="Nama pengguna akhir">
+                </div>
+
+                <div class="form-group">
+                    <label>Peran Responden</label>
+                    <select name="peran">
+                        <option value="">— Pilih peran —</option>
+                        <option>Admin</option>
+                        <option>Petugas</option>
+                        <option>Peminjam</option>
+                    </select>
+                </div>
+
+                <div class="form-group full">
+                    <label>Skenario UAT</label>
+                    <select name="skenario">
+                        <option value="">— Pilih skenario —</option>
+                        <option>Login</option>
+                        <option>Mengelola Data Barang</option>
+                        <option>Mengelola Data Kategori</option>
+                        <option>Mengelola Data Supplier</option>
+                        <option>Barang Masuk</option>
+                        <option>Barang Keluar</option>
+                        <option>Peminjaman</option>
+                        <option>Pengembalian</option>
+                        <option>Dashboard</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h2>Pertanyaan Wawancara</h2>
+
+            <div class="question">
+                <p>1. Apakah fitur dapat diakses dengan mudah?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q1" value="Ya"> Ya</label>
+                    <label><input type="radio" name="q1" value="Tidak"> Tidak</label>
+                    <label><input type="radio" name="q1" value="Sebagian"> Sebagian</label>
+                </div>
+                <label class="note-label">Catatan Q1</label>
+                <textarea name="catatan1" placeholder="Catatan responden..."></textarea>
+            </div>
+
+            <div class="question">
+                <p>2. Apakah hasil sesuai dengan kebutuhan?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q2" value="Ya"> Ya</label>
+                    <label><input type="radio" name="q2" value="Tidak"> Tidak</label>
+                    <label><input type="radio" name="q2" value="Sebagian"> Sebagian</label>
+                </div>
+                <label class="note-label">Catatan Q2</label>
+                <textarea name="catatan2" placeholder="Catatan responden..."></textarea>
+            </div>
+
+            <div class="question">
+                <p>3. Apakah tampilan mudah dipahami?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q3" value="Ya"> Ya</label>
+                    <label><input type="radio" name="q3" value="Tidak"> Tidak</label>
+                    <label><input type="radio" name="q3" value="Sebagian"> Sebagian</label>
+                </div>
+                <label class="note-label">Catatan Q3</label>
+                <textarea name="catatan3" placeholder="Catatan responden..."></textarea>
+            </div>
+
+            <div class="question">
+                <p>4. Apakah performa sistem memadai?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q4" value="Ya"> Ya</label>
+                    <label><input type="radio" name="q4" value="Tidak"> Tidak</label>
+                    <label><input type="radio" name="q4" value="Sebagian"> Sebagian</label>
+                </div>
+                <label class="note-label">Catatan Q4</label>
+                <textarea name="catatan4" placeholder="Catatan responden..."></textarea>
+            </div>
+
+            <div class="question">
+                <p>5. Apakah sistem layak digunakan?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q5" value="Ya"> Ya</label>
+                    <label><input type="radio" name="q5" value="Tidak"> Tidak</label>
+                    <label><input type="radio" name="q5" value="Sebagian"> Sebagian</label>
+                </div>
+                <label class="note-label">Catatan Q5</label>
+                <textarea name="catatan5" placeholder="Catatan responden..."></textarea>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h2>Keputusan UAT</h2>
+
+            <div class="form-group">
+                <label>Keputusan UAT</label>
+                <select name="keputusan">
+                    <option value="">— Pilih keputusan —</option>
+                    <option>Diterima</option>
+                    <option>Ditolak</option>
+                </select>
+            </div>
+
+            <div class="form-group suggestion">
+                <label>Saran Perbaikan</label>
+                <textarea name="saran" placeholder="Saran dari responden..."></textarea>
+            </div>
+        </section>
+
+        <div class="button-group">
+            <button type="button" class="btn btn-save" onclick="simpanData()">
+                Simpan Data
+            </button>
+
+            <button type="button" class="btn btn-print" onclick="cetakForm()">
+                Cetak Formulir Ini
+            </button>
+
+            <button type="button" class="btn btn-reset" onclick="resetForm()">
+                Reset
+            </button>
+        </div>
+
+        <p id="pesan"></p>
+
+    </form>
+
+    <footer>
+        <p>© 2026 SIFIN - Sistem Informasi Inventory</p>
+    </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
