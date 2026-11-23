@@ -5,6 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulir UAT - SIFIN/SIVIN</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Tambahan gaya khusus tabel rekap & kartu persentase */
+        .rekap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .stat-card {
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-card span { font-size: 0.85rem; color: #475569; }
+        .stat-card strong { font-size: 1.3rem; }
+        .stat-diterima { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+        .stat-ditolak { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        .table-wrapper { overflow-x: auto; }
+        .rekap-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .rekap-table th, .rekap-table td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .rekap-table th { background: #f1f5f9; }
+        .empty-row { text-align: center !important; color: #64748b; padding: 16px !important; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .badge-diterima { background: #d1fae5; color: #065f46; }
+        .badge-ditolak { background: #fee2e2; color: #991b1b; }
+        .btn-danger-sm {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-danger-sm:hover { background: #b91c1c; }
+    </style>
 </head>
 <body>
 
@@ -45,25 +108,25 @@
                     <label>Peran Responden</label>
                     <select name="peran">
                         <option value="">— Pilih peran —</option>
-                        <option>Admin</option>
-                        <option>Petugas</option>
-                        <option>Peminjam</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Petugas">Petugas</option>
+                        <option value="Peminjam">Peminjam</option>
                     </select>
                 </div>
 
                 <div class="form-group full">
                     <label>Skenario UAT</label>
-                    <select name="skenario">
+                    <select id="skenario" name="skenario" onchange="ubahPertanyaan()">
                         <option value="">— Pilih skenario —</option>
-                        <option>Login</option>
-                        <option>Mengelola Data Barang</option>
-                        <option>Mengelola Data Kategori</option>
-                        <option>Mengelola Data Supplier</option>
-                        <option>Barang Masuk</option>
-                        <option>Barang Keluar</option>
-                        <option>Peminjaman</option>
-                        <option>Pengembalian</option>
-                        <option>Dashboard</option>
+                        <option value="Login">Login</option>
+                        <option value="Mengelola Data Barang">Mengelola Data Barang</option>
+                        <option value="Mengelola Data Kategori">Mengelola Data Kategori</option>
+                        <option value="Mengelola Data Supplier">Mengelola Data Supplier</option>
+                        <option value="Barang Masuk">Barang Masuk</option>
+                        <option value="Barang Keluar">Barang Keluar</option>
+                        <option value="Peminjaman">Peminjaman</option>
+                        <option value="Pengembalian">Pengembalian</option>
+                        <option value="Dashboard">Dashboard</option>
                     </select>
                 </div>
             </div>
@@ -73,7 +136,7 @@
             <h2>Pertanyaan Wawancara</h2>
 
             <div class="question">
-                <p>1. Apakah menu dan alur navigasi pada fitur yang diuji (master data, transaksi barang, atau peminjaman) mudah ditemukan dan diakses?</p>
+                <p id="q1-text">1. Apakah menu dan alur navigasi pada fitur yang diuji mudah ditemukan dan diakses?</p>
                 <div class="radio-group">
                     <label><input type="radio" name="q1" value="Mudah"> Mudah</label>
                     <label><input type="radio" name="q1" value="Cukup Mudah"> Cukup Mudah</label>
@@ -84,7 +147,7 @@
             </div>
 
             <div class="question">
-                <p>2. Apakah proses input data, pembaruan stok (barang masuk/keluar/peminjaman), dan hasil tampilannya sudah akurat sesuai kebutuhan operasional?</p>
+                <p id="q2-text">2. Apakah proses input data dan hasil tampilannya sudah akurat sesuai kebutuhan operasional?</p>
                 <div class="radio-group">
                     <label><input type="radio" name="q2" value="Sesuai Sepenuhnya"> Sesuai Sepenuhnya</label>
                     <label><input type="radio" name="q2" value="Sebagian Sesuai"> Sebagian Sesuai</label>
@@ -95,7 +158,7 @@
             </div>
 
             <div class="question">
-                <p>3. Apakah tata letak tabel, formulir input, label kolom, dan pesan notifikasi pada halaman mudah dipahami?</p>
+                <p id="q3-text">3. Apakah tata letak tabel, formulir input, label kolom, dan pesan notifikasi pada halaman mudah dipahami?</p>
                 <div class="radio-group">
                     <label><input type="radio" name="q3" value="Sangat Jelas"> Sangat Jelas</label>
                     <label><input type="radio" name="q3" value="Cukup Jelas"> Cukup Jelas</label>
@@ -106,7 +169,7 @@
             </div>
 
             <div class="question">
-                <p>4. Apakah kecepatan muat halaman, proses penyimpanan data, dan pencarian barang berjalan lancar tanpa kendala (lag/error)?</p>
+                <p id="q4-text">4. Apakah kecepatan muat halaman dan proses penyimpanan data berjalan lancar tanpa kendala (lag/error)?</p>
                 <div class="radio-group">
                     <label><input type="radio" name="q4" value="Cepat & Stabil"> Cepat &amp; Stabil</label>
                     <label><input type="radio" name="q4" value="Cukup Memadai"> Cukup Memadai</label>
@@ -117,7 +180,7 @@
             </div>
 
             <div class="question">
-                <p>5. Secara keseluruhan, apakah fitur pada skenario ini sudah layak diterapkan untuk operasional pengelolaan inventaris sehari-hari?</p>
+                <p id="q5-text">5. Secara keseluruhan, apakah fitur pada skenario ini sudah layak diterapkan untuk operasional pengelolaan inventaris sehari-hari?</p>
                 <div class="radio-group">
                     <label><input type="radio" name="q5" value="Layak Digunakan"> Layak Digunakan</label>
                     <label><input type="radio" name="q5" value="Layak dengan Catatan"> Layak dengan Catatan</label>
@@ -135,8 +198,8 @@
                 <label>Keputusan UAT</label>
                 <select name="keputusan">
                     <option value="">— Pilih keputusan —</option>
-                    <option>Diterima</option>
-                    <option>Ditolak</option>
+                    <option value="Diterima">Diterima</option>
+                    <option value="Ditolak">Ditolak</option>
                 </select>
             </div>
 
@@ -163,6 +226,54 @@
         <p id="pesan"></p>
 
     </form>
+
+    <!-- Daftar Data yang Sudah Diisi & Persentase -->
+    <section class="form-section">
+        <div class="rekap-header">
+            <h2>Daftar Data UAT Tersimpan</h2>
+            <button type="button" class="btn-danger-sm" onclick="hapusSemuaData()">
+                Hapus Semua Data
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span>Total Data Masuk</span>
+                <strong id="totalData">0</strong>
+            </div>
+            <div class="stat-card stat-diterima">
+                <span>Diterima</span>
+                <strong id="jumlahDiterima">0 (0%)</strong>
+            </div>
+            <div class="stat-card stat-ditolak">
+                <span>Ditolak</span>
+                <strong id="jumlahDitolak">0 (0%)</strong>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="rekap-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Skenario</th>
+                        <th>Responden (Peran)</th>
+                        <th>Penguji</th>
+                        <th>Jawaban (Q1–Q5)</th>
+                        <th>Keputusan</th>
+                        <th>Saran</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelRekapBody">
+                    <tr>
+                        <td colspan="9" class="empty-row">Belum ada data UAT yang disimpan.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <footer>
         <p>© 2026 SIFIN/SIVIN - Sistem Informasi Inventory</p>
