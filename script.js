@@ -222,16 +222,4 @@ function cetakForm() {
 }
 
 function resetForm() {
-    if (confirm("Kosongkan isian formulir saat ini?")) {
-        document.getElementById("formUAT").reset();
-        ubahPertanyaan();
-        const pesan = document.getElementById("pesan");
-        pesan.textContent = "Formulir telah dikosongkan.";
-        pesan.style.color = "#475569";
-    }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-    ubahPertanyaan();
-    renderRekap();
-});
+    if
