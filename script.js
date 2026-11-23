@@ -74,35 +74,47 @@ const defaultPertanyaan = [
 
 const STORAGE_KEY = "rekapUAT_SIVIN";
 
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+function setWidth(id, width) {
+    const el = document.getElementById(id);
+    if (el) el.style.width = width;
+}
+
 function bukaMenu(menu) {
     const menuForm = document.getElementById("menuForm");
     const menuPersen = document.getElementById("menuPersen");
     const tabForm = document.getElementById("tabForm");
     const tabPersen = document.getElementById("tabPersen");
 
+    if (!menuForm || !menuPersen) return;
+
     if (menu === "persen") {
         menuForm.classList.add("hidden");
         menuPersen.classList.remove("hidden");
-        tabForm.classList.remove("active");
-        tabPersen.classList.add("active");
+        if (tabForm) tabForm.classList.remove("active");
+        if (tabPersen) tabPersen.classList.add("active");
         renderRekap();
     } else {
         menuPersen.classList.add("hidden");
         menuForm.classList.remove("hidden");
-        tabPersen.classList.remove("active");
-        tabForm.classList.add("active");
+        if (tabPersen) tabPersen.classList.remove("active");
+        if (tabForm) tabForm.classList.add("active");
     }
 }
 
 function ubahPertanyaan() {
-    const skenario = document.getElementById("skenario").value;
+    const select = document.getElementById("skenario");
+    if (!select) return;
+
+    const skenario = select.value;
     const pertanyaan = daftarPertanyaan[skenario] || defaultPertanyaan;
 
     for (let i = 1; i <= 5; i++) {
-        const elemen = document.getElementById(`q${i}-text`);
-        if (elemen) {
-            elemen.textContent = pertanyaan[i - 1];
-        }
+        setText(`q${i}-text`, pertanyaan[i - 1]);
     }
 }
 
@@ -117,6 +129,8 @@ function ambilDaftarRekap() {
 
 function simpanData() {
     const form = document.getElementById("formUAT");
+    if (!form) return;
+
     const formData = new FormData(form);
     const data = {};
 
@@ -127,8 +141,10 @@ function simpanData() {
     const pesan = document.getElementById("pesan");
 
     if (!data.namaResponden || !data.skenario || !data.keputusan) {
-        pesan.textContent = "Harap isi Nama Responden, Skenario UAT, dan Keputusan UAT terlebih dahulu.";
-        pesan.style.color = "#dc2626";
+        if (pesan) {
+            pesan.textContent = "Harap isi Nama Responden, Skenario UAT, dan Keputusan UAT terlebih dahulu.";
+            pesan.style.color = "#dc2626";
+        }
         return;
     }
 
@@ -137,8 +153,10 @@ function simpanData() {
     daftar.push(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(daftar));
 
-    pesan.textContent = "Data berhasil disimpan! Klik menu 'Persentase & Rekapitulasi' untuk melihat detailnya.";
-    pesan.style.color = "#15803d";
+    if (pesan) {
+        pesan.textContent = "Data berhasil disimpan! Klik menu 'Persentase & Rekapitulasi' untuk melihat detailnya.";
+        pesan.style.color = "#15803d";
+    }
 
     renderRekap();
 }
@@ -154,19 +172,17 @@ function renderRekap() {
     const persenDiterima = total > 0 ? ((diterima / total) * 100).toFixed(1) : "0";
     const persenDitolak = total > 0 ? ((ditolak / total) * 100).toFixed(1) : "0";
 
-    // Update badge persentase di tombol menu
-    document.getElementById("menuBadgeDiterima").textContent = `Menerima: ${persenDiterima}%`;
-    document.getElementById("menuBadgeDitolak").textContent = `Menolak: ${persenDitolak}%`;
+    setText("menuBadgeDiterima", `Menerima: ${persenDiterima}%`);
+    setText("menuBadgeDitolak", `Menolak: ${persenDitolak}%`);
+    setText("totalData", total);
+    setText("jumlahDiterima", `${persenDiterima}% (${diterima})`);
+    setText("jumlahDitolak", `${persenDitolak}% (${ditolak})`);
+    setText("labelPersenDiterima", `${persenDiterima}% (${diterima} responden)`);
+    setText("labelPersenDitolak", `${persenDitolak}% (${ditolak} responden)`);
+    setWidth("barDiterima", `${persenDiterima}%`);
+    setWidth("barDitolak", `${persenDitolak}%`);
 
-    // Update kartu statistik & progress bar
-    document.getElementById("totalData").textContent = total;
-    document.getElementById("jumlahDiterima").textContent = `${persenDiterima}% (${diterima})`;
-    document.getElementById("jumlahDitolak").textContent = `${persenDitolak}% (${ditolak})`;
-
-    document.getElementById("labelPersenDiterima").textContent = `${persenDiterima}% (${diterima} responden)`;
-    document.getElementById("labelPersenDitolak").textContent = `${persenDitolak}% (${ditolak} responden)`;
-    document.getElementById("barDiterima").style.width = `${persenDiterima}%`;
-    document.getElementById("barDitolak").style.width = `${persenDitolak}%`;
+    if (!tbody) return;
 
     if (total === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="empty-row">Belum ada data UAT yang disimpan.</td></tr>`;
@@ -223,11 +239,14 @@ function cetakForm() {
 
 function resetForm() {
     if (confirm("Kosongkan isian formulir saat ini?")) {
-        document.getElementById("formUAT").reset();
+        const form = document.getElementById("formUAT");
+        if (form) form.reset();
         ubahPertanyaan();
         const pesan = document.getElementById("pesan");
-        pesan.textContent = "Formulir telah dikosongkan.";
-        pesan.style.color = "#475569";
+        if (pesan) {
+            pesan.textContent = "Formulir telah dikosongkan.";
+            pesan.style.color = "#475569";
+        }
     }
 }
 
