@@ -74,6 +74,26 @@ const defaultPertanyaan = [
 
 const STORAGE_KEY = "rekapUAT_SIVIN";
 
+function bukaMenu(menu) {
+    const menuForm = document.getElementById("menuForm");
+    const menuPersen = document.getElementById("menuPersen");
+    const tabForm = document.getElementById("tabForm");
+    const tabPersen = document.getElementById("tabPersen");
+
+    if (menu === "persen") {
+        menuForm.classList.add("hidden");
+        menuPersen.classList.remove("hidden");
+        tabForm.classList.remove("active");
+        tabPersen.classList.add("active");
+        renderRekap();
+    } else {
+        menuPersen.classList.add("hidden");
+        menuForm.classList.remove("hidden");
+        tabPersen.classList.remove("active");
+        tabForm.classList.add("active");
+    }
+}
+
 function ubahPertanyaan() {
     const skenario = document.getElementById("skenario").value;
     const pertanyaan = daftarPertanyaan[skenario] || defaultPertanyaan;
@@ -117,7 +137,7 @@ function simpanData() {
     daftar.push(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(daftar));
 
-    pesan.textContent = "Data berhasil disimpan dan ditampilkan di tabel bawah.";
+    pesan.textContent = "Data berhasil disimpan! Klik menu 'Persentase & Rekapitulasi' untuk melihat detailnya.";
     pesan.style.color = "#15803d";
 
     renderRekap();
@@ -134,9 +154,19 @@ function renderRekap() {
     const persenDiterima = total > 0 ? ((diterima / total) * 100).toFixed(1) : "0";
     const persenDitolak = total > 0 ? ((ditolak / total) * 100).toFixed(1) : "0";
 
+    // Update badge persentase di tombol menu
+    document.getElementById("menuBadgeDiterima").textContent = `Menerima: ${persenDiterima}%`;
+    document.getElementById("menuBadgeDitolak").textContent = `Menolak: ${persenDitolak}%`;
+
+    // Update kartu statistik & progress bar
     document.getElementById("totalData").textContent = total;
-    document.getElementById("jumlahDiterima").textContent = `${diterima} (${persenDiterima}%)`;
-    document.getElementById("jumlahDitolak").textContent = `${ditolak} (${persenDitolak}%)`;
+    document.getElementById("jumlahDiterima").textContent = `${persenDiterima}% (${diterima})`;
+    document.getElementById("jumlahDitolak").textContent = `${persenDitolak}% (${ditolak})`;
+
+    document.getElementById("labelPersenDiterima").textContent = `${persenDiterima}% (${diterima} responden)`;
+    document.getElementById("labelPersenDitolak").textContent = `${persenDitolak}% (${ditolak} responden)`;
+    document.getElementById("barDiterima").style.width = `${persenDiterima}%`;
+    document.getElementById("barDitolak").style.width = `${persenDitolak}%`;
 
     if (total === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="empty-row">Belum ada data UAT yang disimpan.</td></tr>`;
@@ -164,7 +194,7 @@ function renderRekap() {
                 <td><small>${jawaban}</small></td>
                 <td><span class="badge ${badgeClass}">${item.keputusan}</span></td>
                 <td>${item.saran || "-"}</td>
-                <td>
+                <td class="col-aksi">
                     <button type="button" class="btn-danger-sm" onclick="hapusSatuData(${item.id})">
                         Hapus
                     </button>
