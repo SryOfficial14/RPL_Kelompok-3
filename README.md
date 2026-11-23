@@ -17,7 +17,7 @@ Sistem ini dirancang untuk mempermudah pengguna dalam mengelola data barang, men
 * **Manajemen Pengguna & Autentikasi**: Fitur login untuk hak akses pengguna.
 * **Data Master**: Pengelolaan data kategori barang, satuan/lokasi penyimpanan, dan data supplier.
 * **Transaksi Inventori**: Pencatatan barang masuk, barang keluar, serta peminjaman dan pengembalian barang.
-* **Laporan & Dokumentasi**: Rekapitulasi stok barang dan laporan proyek (`laporan rpl_kel3.docx`)[cite: 1].
+* **Laporan & Dokumentasi**: Rekapitulasi stok barang dan laporan proyek laporan rpl_kel3.docx
 
 ---
 
