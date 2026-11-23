@@ -26,4 +26,5 @@ Sistem ini dirancang untuk mempermudah pengguna dalam mengelola data barang, men
 ## 4. Tautan Form & Dokumentasi
 - **Formulir Wawancara UAT (GitHub Pages)**: [Buka Formulir UAT](https://sryofficial14.github.io/RPL_Kelompok-3/)
 - **Laporan Pengujian Perangkat Lunak**: [laporan rpl_kel3.pdf](./laporan%20rpl_kel3.pdf)
+- **Persentasi Materi Kelompok Kami**: [ppt_rpl kel 3.pptx](./ppt_rpl%20kel%203.pptx)
 - **Repositori GitHub**: [RPL_Kelompok-3](https://github.com/SryOfficial14/RPL_Kelompok-3)
