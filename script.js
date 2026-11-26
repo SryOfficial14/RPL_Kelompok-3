@@ -8,7 +8,7 @@ const EMAILJS_PUBLIC_KEY  = "pykwTa_QqgXczTxFr";
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
 // =========================================================================
-// 10 PERTANYAAN KHUSUS MASING-MASING PERAN (ADMIN, PETUGAS, PEMIMPIN)
+// PERTANYAAN KHUSUS PER PERAN
 // =========================================================================
 const PERTANYAAN_PER_PERAN = {
     Admin: [
@@ -67,12 +67,11 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
-// Set tanggal hari ini otomatis
 if (testDateInput) {
     testDateInput.valueAsDate = new Date();
 }
 
-// Render 10 pertanyaan sesuai peran
+// Render pertanyaan
 function loadQuestions() {
     if (!roleSelect || !questionsContainer || !questionBoxTitle) return;
 
@@ -100,13 +99,144 @@ function loadQuestions() {
     });
 }
 
-// Jalankan pemuatan pertanyaan saat halaman pertama kali terbuka dan saat role diganti
 loadQuestions();
 if (roleSelect) {
     roleSelect.addEventListener("change", loadQuestions);
 }
 
-// Kirim ke EmailJS
+// =========================================================================
+// NAVIGASI NAVBAR & TAB
+// =========================================================================
+function switchTab(tabName) {
+    const tabBtnForm = document.getElementById("tabBtnForm");
+    const tabBtnStats = document.getElementById("tabBtnStats");
+    const viewForm = document.getElementById("viewForm");
+    const viewStats = document.getElementById("viewStats");
+
+    if (tabName === 'form') {
+        tabBtnForm.classList.add("active");
+        tabBtnStats.classList.remove("active");
+        viewForm.classList.add("active");
+        viewStats.classList.remove("active");
+    } else {
+        tabBtnStats.classList.add("active");
+        tabBtnForm.classList.remove("active");
+        viewStats.classList.add("active");
+        viewForm.classList.remove("active");
+        renderCharts();
+    }
+}
+
+// =========================================================================
+// MANAJEMEN DATA PERSENTASE & CHART.JS
+// =========================================================================
+function getStoredUatData() {
+    const data = localStorage.getItem("sifin_uat_records");
+    if (!data) {
+        // Data default sebagai simulasi awal
+        return [
+            { decision: "Diterima", answers: { ya: 9, sebagian: 1, tidak: 0 } },
+            { decision: "Diterima", answers: { ya: 8, sebagian: 2, tidak: 0 } },
+            { decision: "Diterima", answers: { ya: 10, sebagian: 0, tidak: 0 } },
+            { decision: "Ditolak",  answers: { ya: 4, sebagian: 3, tidak: 3 } }
+        ];
+    }
+    return JSON.parse(data);
+}
+
+function saveUatRecord(record) {
+    const records = getStoredUatData();
+    records.push(record);
+    localStorage.setItem("sifin_uat_records", JSON.stringify(records));
+}
+
+let decisionChartInstance = null;
+let feedbackChartInstance = null;
+
+function renderCharts() {
+    const records = getStoredUatData();
+    const total = records.length;
+
+    let diterimaCount = 0;
+    let ditolakCount = 0;
+    let totalYa = 0;
+    let totalSebagian = 0;
+    let totalTidak = 0;
+
+    records.forEach(r => {
+        if (r.decision === "Diterima") diterimaCount++;
+        else ditolakCount++;
+
+        if (r.answers) {
+            totalYa += (r.answers.ya || 0);
+            totalSebagian += (r.answers.sebagian || 0);
+            totalTidak += (r.answers.tidak || 0);
+        }
+    });
+
+    const diterimaPct = total > 0 ? ((diterimaCount / total) * 100).toFixed(1) : 0;
+    const ditolakPct = total > 0 ? ((ditolakCount / total) * 100).toFixed(1) : 0;
+
+    document.getElementById("totalRespondenCount").textContent = total;
+    document.getElementById("totalDiterimaCount").textContent = `${diterimaPct}%`;
+    document.getElementById("totalDitolakCount").textContent = `${ditolakPct}%`;
+
+    // 1. Diagram Lingkaran Keputusan Diterima vs Ditolak
+    const ctxDecision = document.getElementById("decisionChart").getContext("2d");
+    if (decisionChartInstance) decisionChartInstance.destroy();
+
+    decisionChartInstance = new Chart(ctxDecision, {
+        type: 'pie',
+        data: {
+            labels: [`Diterima (${diterimaPct}%)`, `Ditolak (${ditolakPct}%)`],
+            datasets: [{
+                data: [diterimaCount, ditolakCount],
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 14 } }
+                }
+            }
+        }
+    });
+
+    // 2. Diagram Batang Respons Jawaban
+    const ctxFeedback = document.getElementById("feedbackChart").getContext("2d");
+    if (feedbackChartInstance) feedbackChartInstance.destroy();
+
+    feedbackChartInstance = new Chart(ctxFeedback, {
+        type: 'doughnut',
+        data: {
+            labels: ['Jawaban Ya', 'Jawaban Sebagian', 'Jawaban Tidak'],
+            datasets: [{
+                data: [totalYa, totalSebagian, totalTidak],
+                backgroundColor: ['#0d6efd', '#ffc107', '#6c757d'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 13 } }
+                }
+            }
+        }
+    });
+}
+
+// =========================================================================
+// SUBMIT FORM KE EMAILJS & PENYIMPANAN STATISTIK
+// =========================================================================
 if (uatForm) {
     uatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -124,20 +254,23 @@ if (uatForm) {
         let rincianHtml = [];
         const qAnswers = {};
 
+        let countYa = 0;
+        let countSebagian = 0;
+        let countTidak = 0;
+
         for (let i = 1; i <= 10; i++) {
             const checkedInput = document.querySelector(`input[name="q${i}"]:checked`);
             const jwb = checkedInput ? checkedInput.value : "-";
             const noteInput = document.getElementById(`catatan${i}`);
             const cat = noteInput && noteInput.value.trim() ? noteInput.value.trim() : "-";
 
+            if (jwb === "Ya") countYa++;
+            else if (jwb === "Sebagian") countSebagian++;
+            else if (jwb === "Tidak") countTidak++;
+
             qAnswers[`q${i}_answer`] = jwb;
 
-            rincianText.push(
-                `${list[i - 1].q}\n` +
-                `Jawaban: ${jwb}\n` +
-                `Catatan: ${cat}`
-            );
-
+            rincianText.push(`${list[i - 1].q}\nJawaban: ${jwb}\nCatatan: ${cat}`);
             rincianHtml.push(`
                 <div style="background:#f8f9fa;border-left:3px solid #0d6efd;padding:10px 14px;margin-bottom:10px;border-radius:4px;">
                     <div style="font-weight:600;color:#111827;margin-bottom:4px;">${escapeHtml(list[i - 1].q)}</div>
@@ -147,32 +280,16 @@ if (uatForm) {
             `);
         }
 
-        const detailPertanyaanText = rincianText.join("\n\n");
-        const detailPertanyaanHtml = rincianHtml.join("");
-
-        const ringkasanLaporan = [
-            `Nama Penguji: ${qaName}`,
-            `Tanggal Pengujian: ${testDate}`,
-            `Nama Responden: ${respondentName}`,
-            `Peran Responden: ${role}`,
-            `----------------------------------------`,
-            detailPertanyaanText,
-            `----------------------------------------`,
-            `Keputusan UAT: ${keputusanAkhir}`,
-            `Saran Perbaikan: ${saranPerbaikan}`
-        ].join("\n");
-
         const templateParams = {
             qa_name: qaName,
             test_date: testDate,
             respondent_name: respondentName,
             respondent_role: role,
             ...qAnswers,
-            detail_pertanyaan: detailPertanyaanText,
-            detail_pertanyaan_html: detailPertanyaanHtml,
+            detail_pertanyaan: rincianText.join("\n\n"),
+            detail_pertanyaan_html: rincianHtml.join(""),
             keputusan_akhir: keputusanAkhir,
-            saran_perbaikan: saranPerbaikan,
-            ringkasan_laporan: ringkasanLaporan
+            saran_perbaikan: saranPerbaikan
         };
 
         const btn = document.getElementById("submitBtn");
@@ -180,28 +297,32 @@ if (uatForm) {
             btn.disabled = true;
             btn.textContent = "Mengirim ke Email...";
         }
-        if (statusMsg) {
-            statusMsg.style.display = "none";
-        }
+        if (statusMsg) statusMsg.style.display = "none";
 
         try {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+
+            // Simpan ke data persentase
+            saveUatRecord({
+                decision: keputusanAkhir,
+                answers: { ya: countYa, sebagian: countSebagian, tidak: countTidak }
+            });
+
             if (statusMsg) {
                 statusMsg.className = "status-msg ok";
-                statusMsg.textContent = "✅ Berhasil! Jawaban formulir kepuasan pengguna sudah terkirim ke email.";
+                statusMsg.textContent = "✅ Berhasil! Jawaban formulir tersimpan dan sudah terkirim ke email.";
                 statusMsg.style.display = "block";
             }
+
             uatForm.reset();
-            if (testDateInput) {
-                testDateInput.valueAsDate = new Date();
-            }
+            if (testDateInput) testDateInput.valueAsDate = new Date();
             roleSelect.value = role;
             loadQuestions();
         } catch (error) {
             console.error("EmailJS Error:", error);
             if (statusMsg) {
                 statusMsg.className = "status-msg err";
-                statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan Service ID, Template ID, dan Public Key sesuai.";
+                statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan template dan internet aktif.";
                 statusMsg.style.display = "block";
             }
         } finally {
