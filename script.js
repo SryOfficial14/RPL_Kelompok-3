@@ -93,25 +93,49 @@ document.getElementById("uatForm").addEventListener("submit", async (e) => {
 
     const role = roleSelect.value;
     const list = PERTANYAAN_PER_PERAN[role];
+    const qaName = document.getElementById("qaName").value.trim();
+    const testDate = document.getElementById("testDate").value;
+    const respondentName = document.getElementById("respondentName").value.trim();
+    const keputusanAkhir = document.querySelector('input[name="decision"]:checked').value;
+    const saranPerbaikan = document.getElementById("suggestions").value.trim() || "-";
 
     let rincian = [];
     const qAnswers = {};
     for (let i = 1; i <= 10; i++) {
-        const jwb = document.querySelector(`input[name="q${i}"]:checked`).value;
+        const checkedInput = document.querySelector(`input[name="q${i}"]:checked`);
+        const jwb = checkedInput ? checkedInput.value : "-";
         const cat = document.getElementById(`catatan${i}`).value.trim();
         qAnswers[`q${i}_answer`] = jwb;
-        rincian.push(`Q${i} (${list[i - 1].ket}): ${jwb}${cat ? " - Catatan: " + cat : ""}`);
+        rincian.push(
+            `${list[i - 1].q}\n` +
+            `   (${list[i - 1].ket})\n` +
+            `   Jawaban: ${jwb}${cat ? " | Catatan: " + cat : ""}`
+        );
     }
 
+    const detailPertanyaanText = rincian.join("\n\n");
+    const ringkasanLaporan = [
+        `Nama Penguji (QA): ${qaName}`,
+        `Tanggal Pengujian: ${testDate}`,
+        `Nama Responden: ${respondentName}`,
+        `Peran Responden: ${role}`,
+        `----------------------------------------`,
+        detailPertanyaanText,
+        `----------------------------------------`,
+        `Keputusan Kelayakan Sistem: ${keputusanAkhir}`,
+        `Saran Perbaikan: ${saranPerbaikan}`
+    ].join("\n");
+
     const templateParams = {
-        qa_name: document.getElementById("qaName").value.trim(),
-        test_date: document.getElementById("testDate").value,
-        respondent_name: document.getElementById("respondentName").value.trim(),
+        qa_name: qaName,
+        test_date: testDate,
+        respondent_name: respondentName,
         respondent_role: role,
         ...qAnswers,
-        detail_pertanyaan: rincian.join("\n"),
-        keputusan_akhir: document.querySelector('input[name="decision"]:checked').value,
-        saran_perbaikan: document.getElementById("suggestions").value.trim() || "-"
+        detail_pertanyaan: detailPertanyaanText,
+        keputusan_akhir: keputusanAkhir,
+        saran_perbaikan: saranPerbaikan,
+        ringkasan_laporan: ringkasanLaporan
     };
 
     const btn = document.getElementById("submitBtn");
