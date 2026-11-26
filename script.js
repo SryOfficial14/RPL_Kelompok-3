@@ -71,7 +71,7 @@ if (testDateInput) {
     testDateInput.valueAsDate = new Date();
 }
 
-// Render pertanyaan
+// Render pertanyaan ke form
 function loadQuestions() {
     if (!roleSelect || !questionsContainer || !questionBoxTitle) return;
 
@@ -107,11 +107,13 @@ if (roleSelect) {
 // =========================================================================
 // NAVIGASI NAVBAR & TAB
 // =========================================================================
-function switchTab(tabName) {
+window.switchTab = function(tabName) {
     const tabBtnForm = document.getElementById("tabBtnForm");
     const tabBtnStats = document.getElementById("tabBtnStats");
     const viewForm = document.getElementById("viewForm");
     const viewStats = document.getElementById("viewStats");
+
+    if (!tabBtnForm || !tabBtnStats || !viewForm || !viewStats) return;
 
     if (tabName === 'form') {
         tabBtnForm.classList.add("active");
@@ -125,15 +127,27 @@ function switchTab(tabName) {
         viewForm.classList.remove("active");
         renderCharts();
     }
-}
+};
+
+// Event listener tombol navbar
+document.addEventListener("DOMContentLoaded", () => {
+    const btnForm = document.getElementById("tabBtnForm");
+    const btnStats = document.getElementById("tabBtnStats");
+
+    if (btnForm) {
+        btnForm.addEventListener("click", () => window.switchTab('form'));
+    }
+    if (btnStats) {
+        btnStats.addEventListener("click", () => window.switchTab('stats'));
+    }
+});
 
 // =========================================================================
-// MANAJEMEN DATA PERSENTASE & CHART.JS
+// DATA PERSENTASE & CHART.JS
 // =========================================================================
 function getStoredUatData() {
     const data = localStorage.getItem("sifin_uat_records");
     if (!data) {
-        // Data default sebagai simulasi awal
         return [
             { decision: "Diterima", answers: { ya: 9, sebagian: 1, tidak: 0 } },
             { decision: "Diterima", answers: { ya: 8, sebagian: 2, tidak: 0 } },
@@ -177,65 +191,73 @@ function renderCharts() {
     const diterimaPct = total > 0 ? ((diterimaCount / total) * 100).toFixed(1) : 0;
     const ditolakPct = total > 0 ? ((ditolakCount / total) * 100).toFixed(1) : 0;
 
-    document.getElementById("totalRespondenCount").textContent = total;
-    document.getElementById("totalDiterimaCount").textContent = `${diterimaPct}%`;
-    document.getElementById("totalDitolakCount").textContent = `${ditolakPct}%`;
+    const totalEl = document.getElementById("totalRespondenCount");
+    const ditEl = document.getElementById("totalDiterimaCount");
+    const tolakEl = document.getElementById("totalDitolakCount");
 
-    // 1. Diagram Lingkaran Keputusan Diterima vs Ditolak
-    const ctxDecision = document.getElementById("decisionChart").getContext("2d");
-    if (decisionChartInstance) decisionChartInstance.destroy();
+    if (totalEl) totalEl.textContent = total;
+    if (ditEl) ditEl.textContent = `${diterimaPct}%`;
+    if (tolakEl) tolakEl.textContent = `${ditolakPct}%`;
 
-    decisionChartInstance = new Chart(ctxDecision, {
-        type: 'pie',
-        data: {
-            labels: [`Diterima (${diterimaPct}%)`, `Ditolak (${ditolakPct}%)`],
-            datasets: [{
-                data: [diterimaCount, ditolakCount],
-                backgroundColor: ['#198754', '#dc3545'],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { font: { size: 14 } }
+    const canvasDecision = document.getElementById("decisionChart");
+    if (canvasDecision) {
+        const ctxDecision = canvasDecision.getContext("2d");
+        if (decisionChartInstance) decisionChartInstance.destroy();
+
+        decisionChartInstance = new Chart(ctxDecision, {
+            type: 'pie',
+            data: {
+                labels: [`Diterima (${diterimaPct}%)`, `Ditolak (${ditolakPct}%)`],
+                datasets: [{
+                    data: [diterimaCount, ditolakCount],
+                    backgroundColor: ['#198754', '#dc3545'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 14 } }
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
-    // 2. Diagram Batang Respons Jawaban
-    const ctxFeedback = document.getElementById("feedbackChart").getContext("2d");
-    if (feedbackChartInstance) feedbackChartInstance.destroy();
+    const canvasFeedback = document.getElementById("feedbackChart");
+    if (canvasFeedback) {
+        const ctxFeedback = canvasFeedback.getContext("2d");
+        if (feedbackChartInstance) feedbackChartInstance.destroy();
 
-    feedbackChartInstance = new Chart(ctxFeedback, {
-        type: 'doughnut',
-        data: {
-            labels: ['Jawaban Ya', 'Jawaban Sebagian', 'Jawaban Tidak'],
-            datasets: [{
-                data: [totalYa, totalSebagian, totalTidak],
-                backgroundColor: ['#0d6efd', '#ffc107', '#6c757d'],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { font: { size: 13 } }
+        feedbackChartInstance = new Chart(ctxFeedback, {
+            type: 'doughnut',
+            data: {
+                labels: ['Jawaban Ya', 'Jawaban Sebagian', 'Jawaban Tidak'],
+                datasets: [{
+                    data: [totalYa, totalSebagian, totalTidak],
+                    backgroundColor: ['#0d6efd', '#ffc107', '#6c757d'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 13 } }
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 // =========================================================================
-// SUBMIT FORM KE EMAILJS & PENYIMPANAN STATISTIK
+// SUBMIT FORM
 // =========================================================================
 if (uatForm) {
     uatForm.addEventListener("submit", async (e) => {
@@ -302,7 +324,6 @@ if (uatForm) {
         try {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
 
-            // Simpan ke data persentase
             saveUatRecord({
                 decision: keputusanAkhir,
                 answers: { ya: countYa, sebagian: countSebagian, tidak: countTidak }
