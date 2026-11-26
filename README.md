@@ -34,3 +34,33 @@ Sistem ini dirancang untuk mempermudah pengguna dalam mengelola data barang, men
 - **Laporan Pengujian Perangkat Lunak**: [laporan rpl_kel3.pdf](./laporan%20rpl_kel3.pdf)
 - **Persentasi Materi Kelompok Kami**: [ppt_rpl kel 3.pptx](./ppt_rpl%20kel%203.pptx)
 - **Repositori GitHub**: [RPL_Kelompok-3](https://github.com/SryOfficial14/RPL_Kelompok-3)
+
+---
+
+## 6. Arsitektur & Struktur Basis Data
+
+Basis data dirancang menggunakan DBMS **MySQL / MariaDB** dengan *storage engine* **InnoDB** untuk menjamin integritas referensial melalui relasi *Foreign Key*, *Cascading*, dan penerapan kaidah normalisasi data.
+
+* **Nama Database:** `db_sivin`
+* **Karakter Set:** `utf8mb4`
+* **Collation:** `utf8mb4_unicode_ci`
+
+### Pengelompokan Tabel Basis Data
+
+#### A. Tabel Master Data
+1. **`users` / `pengguna`**: Menyimpan identitas pengelola, kredensial login (username & password hash), status akun, serta hak akses (`admin`, `petugas`, `peminjam`).
+2. **`kategori`**: Klasifikasi jenis barang atau aset inventaris (contoh: Peralatan Elektronik, ATK, Perkakas, Mebel).
+3. **`lokasi` / `ruangan`**: Data penempatan fisik aset (contoh: Lab Komputer, Ruang Dosen, Gudang Utama).
+4. **`supplier` / `pemasok`**: Informasi profil penyedia atau distributor pengadaan aset barang.
+5. **`barang`**: Data induk inventaris yang mencakup kode barang, nama, relasi kategori, lokasi, batas stok minimum, dan stok yang tersedia.
+
+#### B. Tabel Transaksi (Pola Header-Detail)
+6. **`barang_masuk` (Header)**: Mencatat nomor faktur/surat jalan pengadaan, tanggal penerimaan, supplier rekanan, dan petugas pencatat.
+7. **`barang_masuk_detail` (Detail)**: Rincian item barang beserta kuantitas dan harga satuan yang masuk pada satu nota pengadaan.
+8. **`peminjaman` (Header)**: Mencatat kode transaksi peminjaman, identitas peminjam, tanggal pinjam, batas waktu kembali, dan status nota.
+9. **`peminjaman_detail` (Detail)**: Rincian item barang yang dipinjam dalam satu transaksi peminjaman.
+10. **`pengembalian` & `pengembalian_detail`**: Pencatatan fisik barang saat kembali, verifikasi kondisi aset (baik, rusak, hilang), serta pembaruan status peminjaman.
+
+#### C. Tabel Mutasi Stok (Ledger / Audit Trail)
+11. **`stok_mutasi`**: Buku besar mutasi inventaris yang mencatat riwayat pergerakan stok per barang secara otomatis saat terjadi barang masuk, peminjaman, atau pengembalian.
+    * Rumus integritas saldo: `stok_akhir = stok_awal + jumlah_masuk - jumlah_keluar`
