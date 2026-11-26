@@ -29,7 +29,7 @@ Sistem ini dirancang untuk mempermudah pengguna dalam mengelola data barang, men
 * **Antarmuka (UI):** HTML5, CSS3, JavaScript, AdminLTE 3 / Bootstrap
 * **Lingkungan Server:** Apache (Laragon / XAMPP)
 
-## 4. Tautan Form & Dokumentasi
+## 5. Tautan Form & Dokumentasi
 - **Formulir Wawancara UAT (GitHub Pages)**: [Buka Formulir UAT](https://sryofficial14.github.io/RPL_Kelompok-3/)
 - **Laporan Pengujian Perangkat Lunak**: [laporan rpl_kel3.pdf](./laporan%20rpl_kel3.pdf)
 - **Persentasi Materi Kelompok Kami**: [ppt_rpl kel 3.pptx](./ppt_rpl%20kel%203.pptx)
