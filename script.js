@@ -55,13 +55,28 @@ const roleSelect = document.getElementById("roleSelect");
 const questionsContainer = document.getElementById("questionsContainer");
 const questionBoxTitle = document.getElementById("questionBoxTitle");
 const statusMsg = document.getElementById("statusMsg");
+const testDateInput = document.getElementById("testDate");
+const uatForm = document.getElementById("uatForm");
+
+function escapeHtml(text) {
+    return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 // Set tanggal hari ini otomatis
-document.getElementById("testDate").valueAsDate = new Date();
+if (testDateInput) {
+    testDateInput.valueAsDate = new Date();
+}
 
 // Render 10 pertanyaan sesuai peran yang dipilih
 function loadQuestions() {
-    const role = roleSelect.value;
+    if (!roleSelect || !questionsContainer || !questionBoxTitle) return;
+
+    const role = PERTANYAAN_PER_PERAN[roleSelect.value] ? roleSelect.value : "Admin";
     const list = PERTANYAAN_PER_PERAN[role];
 
     questionBoxTitle.textContent = `B. Pertanyaan Evaluasi — ${role} (10 Pertanyaan)`;
@@ -72,8 +87,8 @@ function loadQuestions() {
         const div = document.createElement("div");
         div.className = "q-item";
         div.innerHTML = `
-            <div class="q-label">${item.q} <span class="req">*</span></div>
-            <div class="q-hint">${item.ket}</div>
+            <div class="q-label">${escapeHtml(item.q)} <span class="req">*</span></div>
+            <div class="q-hint">${escapeHtml(item.ket)}</div>
             <div class="radio-group">
                 <label class="radio-option"><input type="radio" name="q${no}" value="Ya" required> Ya</label>
                 <label class="radio-option"><input type="radio" name="q${no}" value="Sebagian"> Sebagian</label>
@@ -85,81 +100,105 @@ function loadQuestions() {
     });
 }
 
-roleSelect.addEventListener("change", loadQuestions);
+if (roleSelect) {
+    roleSelect.addEventListener("change", loadQuestions);
+}
 
 // Kirim langsung ke EmailJS
-document.getElementById("uatForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+if (uatForm) {
+    uatForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const role = roleSelect.value;
-    const list = PERTANYAAN_PER_PERAN[role];
-    const qaName = document.getElementById("qaName").value.trim();
-    const testDate = document.getElementById("testDate").value;
-    const respondentName = document.getElementById("respondentName").value.trim();
-    const keputusanAkhir = document.querySelector('input[name="decision"]:checked').value;
-    const saranPerbaikan = document.getElementById("suggestions").value.trim() || "-";
+        const role = PERTANYAAN_PER_PERAN[roleSelect.value] ? roleSelect.value : "Admin";
+        const list = PERTANYAAN_PER_PERAN[role];
+        const qaName = document.getElementById("qaName").value.trim();
+        const testDate = document.getElementById("testDate").value;
+        const respondentName = document.getElementById("respondentName").value.trim();
+        const decisionEl = document.querySelector('input[name="decision"]:checked');
+        const keputusanAkhir = decisionEl ? decisionEl.value : "-";
+        const saranPerbaikan = document.getElementById("suggestions").value.trim() || "-";
 
-    let rincian = [];
-    const qAnswers = {};
-    for (let i = 1; i <= 10; i++) {
-        const checkedInput = document.querySelector(`input[name="q${i}"]:checked`);
-        const jwb = checkedInput ? checkedInput.value : "-";
-        const cat = document.getElementById(`catatan${i}`).value.trim();
-        qAnswers[`q${i}_answer`] = jwb;
-        rincian.push(
-            `${list[i - 1].q}\n` +
-            `   (${list[i - 1].ket})\n` +
-            `   Jawaban: ${jwb}${cat ? " | Catatan: " + cat : ""}`
-        );
-    }
+        let rincianText = [];
+        let rincianHtml = [];
+        const qAnswers = {};
 
-    const detailPertanyaanText = rincian.join("\n\n");
-    const ringkasanLaporan = [
-        `Nama Penguji (QA): ${qaName}`,
-        `Tanggal Pengujian: ${testDate}`,
-        `Nama Responden: ${respondentName}`,
-        `Peran Responden: ${role}`,
-        `----------------------------------------`,
-        detailPertanyaanText,
-        `----------------------------------------`,
-        `Keputusan Kelayakan Sistem: ${keputusanAkhir}`,
-        `Saran Perbaikan: ${saranPerbaikan}`
-    ].join("\n");
+        for (let i = 1; i <= 10; i++) {
+            const checkedInput = document.querySelector(`input[name="q${i}"]:checked`);
+            const jwb = checkedInput ? checkedInput.value : "-";
+            const noteInput = document.getElementById(`catatan${i}`);
+            const cat = noteInput && noteInput.value.trim() ? noteInput.value.trim() : "-";
 
-    const templateParams = {
-        qa_name: qaName,
-        test_date: testDate,
-        respondent_name: respondentName,
-        respondent_role: role,
-        ...qAnswers,
-        detail_pertanyaan: detailPertanyaanText,
-        keputusan_akhir: keputusanAkhir,
-        saran_perbaikan: saranPerbaikan,
-        ringkasan_laporan: ringkasanLaporan
-    };
+            qAnswers[`q${i}_answer`] = jwb;
 
-    const btn = document.getElementById("submitBtn");
-    btn.disabled = true;
-    btn.textContent = "Mengirim ke Email...";
-    statusMsg.style.display = "none";
+            rincianText.push(
+                `${list[i - 1].q}\n` +
+                `Jawaban: ${jwb}\n` +
+                `Catatan: ${cat}`
+            );
 
-    try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-        statusMsg.className = "status-msg ok";
-        statusMsg.textContent = "✅ Berhasil! Jawaban formulir kepuasan pengguna sudah terkirim ke email Anda.";
-        document.getElementById("uatForm").reset();
-        document.getElementById("testDate").valueAsDate = new Date();
-        roleSelect.value = role;
-        loadQuestions();
-    } catch (error) {
-        console.error("EmailJS Error:", error);
-        statusMsg.className = "status-msg err";
-        statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan koneksi internet aktif atau periksa template EmailJS Anda.";
-    } finally {
-        statusMsg.style.display = "block";
-        btn.disabled = false;
-        btn.textContent = "Kirim Formulir ke Email";
-    }
-});
+            rincianHtml.push(`
+                <div style="background:#f8f9fa;border-left:3px solid #0d6efd;padding:10px 14px;margin-bottom:10px;border-radius:4px;">
+                    <div style="font-weight:600;color:#111827;margin-bottom:4px;">${escapeHtml(list[i - 1].q)}</div>
+                    <div style="font-size:13px;color:#374151;">Jawaban: <strong>${escapeHtml(jwb)}</strong></div>
+                    <div style="font-size:13px;color:#4b5563;">Catatan: ${escapeHtml(cat)}</div>
+                </div>
+            `);
+        }
 
-loadQuestions();
+        const detailPertanyaanText = rincianText.join("\n\n");
+        const detailPertanyaanHtml = rincianHtml.join("");
+
+        const ringkasanLaporan = [
+            `Nama Penguji: ${qaName}`,
+            `Tanggal Pengujian: ${testDate}`,
+            `Nama Responden: ${respondentName}`,
+            `Peran Responden: ${role}`,
+            `----------------------------------------`,
+            detailPertanyaanText,
+            `----------------------------------------`,
+            `Keputusan UAT: ${keputusanAkhir}`,
+            `Saran Perbaikan: ${saranPerbaikan}`
+        ].join("\n");
+
+        const templateParams = {
+            qa_name: qaName,
+            test_date: testDate,
+            respondent_name: respondentName,
+            respondent_role: role,
+            ...qAnswers,
+            detail_pertanyaan: detailPertanyaanText,
+            detail_pertanyaan_html: detailPertanyaanHtml,
+            keputusan_akhir: keputusanAkhir,
+            saran_perbaikan: saranPerbaikan,
+            ringkasan_laporan: ringkasanLaporan
+        };
+
+        const btn = document.getElementById("submitBtn");
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Mengirim ke Email...";
+        }
+        if (statusMsg) {
+            statusMsg.style.display = "none";
+        }
+
+        try {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+            if (statusMsg) {
+                statusMsg.className = "status-msg ok";
+                statusMsg.textContent = "✅ Berhasil! Jawaban formulir kepuasan pengguna sudah terkirim ke email Anda.";
+            }
+            uatForm.reset();
+            if (testDateInput) {
+                testDateInput.valueAsDate = new Date();
+            }
+            roleSelect.value = role;
+            loadQuestions();
+        } catch (error) {
+            console.error("EmailJS Error:", error);
+            if (statusMsg) {
+                statusMsg.className = "status-msg err";
+                statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan koneksi internet aktif atau periksa template EmailJS Anda.";
+            }
+        } finally {
+            if (statusMsg)
