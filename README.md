@@ -23,6 +23,12 @@ Sistem ini dirancang untuk mempermudah pengguna dalam mengelola data barang, men
 
 ---
 
+## 4. Teknologi yang Digunakan
+* **Bahasa Pemrograman:** PHP Native (Pola MVC)
+* **Basis Data:** MySQL / MariaDB
+* **Antarmuka (UI):** HTML5, CSS3, JavaScript, AdminLTE 3 / Bootstrap
+* **Lingkungan Server:** Apache (Laragon / XAMPP)
+
 ## 4. Tautan Form & Dokumentasi
 - **Formulir Wawancara UAT (GitHub Pages)**: [Buka Formulir UAT](https://sryofficial14.github.io/RPL_Kelompok-3/)
 - **Laporan Pengujian Perangkat Lunak**: [laporan rpl_kel3.pdf](./laporan%20rpl_kel3.pdf)
