@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <!-- Bagian Diagram Bar / Evaluasi Respon Pertanyaan -->
+        <!-- Bagian Diagram Distribusi Respon Pertanyaan -->
         <div class="box">
             <div class="box-title">Distribusi Jawaban Responden (Ya / Sebagian / Tidak)</div>
             <div class="chart-wrapper">
@@ -139,6 +139,22 @@
     </main>
 </div>
 
+<!-- Script Utama -->
 <script src="script.js"></script>
-</body>
-</html>
+
+<!-- Skrip Pengalih Tab (Tertanam Langsung Agar Pasti Berfungsi) -->
+<script>
+function switchTab(tabName) {
+    var tabBtnForm = document.getElementById("tabBtnForm");
+    var tabBtnStats = document.getElementById("tabBtnStats");
+    var viewForm = document.getElementById("viewForm");
+    var viewStats = document.getElementById("viewStats");
+
+    if (!tabBtnForm || !tabBtnStats || !viewForm || !viewStats) return;
+
+    if (tabName === 'form') {
+        tabBtnForm.classList.add("active");
+        tabBtnStats.classList.remove("active");
+        viewForm.classList.add("active");
+        viewStats.classList.remove("active");
+    } else {
