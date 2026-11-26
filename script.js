@@ -1,5 +1,5 @@
 // =========================================================================
-// KONFIGURASI EMAILJS LANGSUNG TERTAUT
+// KONFIGURASI EMAILJS
 // =========================================================================
 const EMAILJS_SERVICE_ID  = "service_s9xp9y6";
 const EMAILJS_TEMPLATE_ID = "template_dy5nseq";
@@ -72,7 +72,7 @@ if (testDateInput) {
     testDateInput.valueAsDate = new Date();
 }
 
-// Render 10 pertanyaan sesuai peran yang dipilih
+// Render 10 pertanyaan sesuai peran
 function loadQuestions() {
     if (!roleSelect || !questionsContainer || !questionBoxTitle) return;
 
@@ -100,11 +100,13 @@ function loadQuestions() {
     });
 }
 
+// Jalankan pemuatan pertanyaan saat halaman pertama kali terbuka dan saat role diganti
+loadQuestions();
 if (roleSelect) {
     roleSelect.addEventListener("change", loadQuestions);
 }
 
-// Kirim langsung ke EmailJS
+// Kirim ke EmailJS
 if (uatForm) {
     uatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -186,7 +188,8 @@ if (uatForm) {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
             if (statusMsg) {
                 statusMsg.className = "status-msg ok";
-                statusMsg.textContent = "✅ Berhasil! Jawaban formulir kepuasan pengguna sudah terkirim ke email Anda.";
+                statusMsg.textContent = "✅ Berhasil! Jawaban formulir kepuasan pengguna sudah terkirim ke email.";
+                statusMsg.style.display = "block";
             }
             uatForm.reset();
             if (testDateInput) {
@@ -198,7 +201,14 @@ if (uatForm) {
             console.error("EmailJS Error:", error);
             if (statusMsg) {
                 statusMsg.className = "status-msg err";
-                statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan koneksi internet aktif atau periksa template EmailJS Anda.";
+                statusMsg.textContent = "❌ Gagal mengirim ke EmailJS. Pastikan Service ID, Template ID, dan Public Key sesuai.";
+                statusMsg.style.display = "block";
             }
         } finally {
-            if (statusMsg)
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Kirim Formulir ke Email";
+            }
+        }
+    });
+}
